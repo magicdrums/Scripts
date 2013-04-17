@@ -1,0 +1,15 @@
+FILE1=$file
+FILEn=$file
+SAVEFILE1=$name file
+SAVEFILEn=$name_file
+MAILTO1=nomail@whatever.com
+MAILTOn=nomail@whatever.com
+MAILFROM=nomail@whatever.com
+
+( cat <<HERE; uuencode "${FILE1}" "${SAVEFILE1}" && uuencode "${FILEn}" "${SAVEFILEn}" ) | /usr/sbin/sendmail -t
+From: ${MAILFROM}
+To: ${MAILTO1}, ${MAILTOn}
+Subject: Whathever Subject
+Body Text
+HERE
+
