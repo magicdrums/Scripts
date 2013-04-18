@@ -1,2 +1,2 @@
 #!/bin/sh
-echo "Hello World";
+echo "Really Bullshit!!!";
