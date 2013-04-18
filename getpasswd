@@ -1,0 +1,25 @@
+#!/bin/bash
+clear
+echo '################ Generador de Contraseñas aleatorias #################'
+echo -n Ingresa la longitud de la contraseña :
+read long
+echo "   Seleccion Tipo de Contraseña"
+echo "1. Alfanumerica"
+echo "2. Numerica"
+echo "3. Alfanumerica con caracteres extraños"
+echo "4. Exit"
+echo -n "Seleccione una de las Opciones [1 - 4]"
+read opt
+case $opt in
+1) echo Contraseña Alfanumerica :
+ tr -dc A-Za-z0-9 < /dev/urandom | head -c $long | xargs;;
+2) echo Contraseña Numerica :
+ tr -dc 0-9 < /dev/urandom | head -c $long | xargs;;
+3) echo Contraseña Alfanumerica con caracteres extraños :
+ tr -dc A-Za-z'[:graph:]' < /dev/urandom | head -c $long | xargs;;
+4) echo "Bye $USER";
+ exit 1;;
+*) echo "$opt No es una Opcion Valida, Favor seleccionar solo las opciones 1 al 4";
+echo "Presione [Enter] para continuar. . .";
+read enterKey;;
+esac
