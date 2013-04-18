@@ -1,0 +1,14 @@
+[custom-meetme]
+exten => s,1,Set(CONFCOUNT=1)
+exten => s,n(READCONF),BackGround(enter-conf-call-number)
+exten => s,n,WaitExten()
+include => ext-meetme
+exten => i,1,GotoIf($[${CONFCOUNT}>2]?GOODBYE)
+exten => i,n,Set(CONFCOUNT=$[${CONFCOUNT}+1])
+exten => i,n,Playback(conf-invalid)
+exten => i,n,Goto(s,READCONF)
+exten => i,n(GOODBYE),Playback(conf-invalid)
+exten => i,n,Playback(vm-goodbye)
+exten => i,n,Hangup
+exten => t,1,Playback(vm-goodbye)
+exten => t,n,Hangup
