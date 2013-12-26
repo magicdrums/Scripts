@@ -3,6 +3,7 @@ Scripts
 
 Bash Scripts
 
+* Base64.php: Pequeño script para desencriptar string's con llave en base64
 * Custom_Meetme: Aplicacion para asterisk para agregar en el archivo extensions.conf, permite egregar opciones de conferencia solicitando el numero y la contraseña.
 * Hello.sh: Nada...
 * Send_Files_Sendmail: Envio de mails por medio de SendMail con archivos adjuntos.
