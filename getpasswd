@@ -12,7 +12,7 @@ echo -n "Seleccione una de las Opciones [1 - 4]"
 read opt
 case $opt in
 1) echo Contraseña Alfanumerica :
- tr -dc A-Za-z0-9 < /dev/urandom | head -c $long | xargs;;
+ tr -dc '[:alnum:][:digit:]' < /dev/urandom | head -c $long | xargs;;
 2) echo Contraseña Numerica :
  tr -dc 0-9 < /dev/urandom | head -c $long | xargs;;
 3) echo Contraseña Alfanumerica con caracteres extraños :
