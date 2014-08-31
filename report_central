@@ -1,0 +1,12 @@
+#!/bin/bash
+LANG=en_US.iso88591
+AYER=$(date -d yesterday +%d+%b+%Y)
+CAMBIODIA=$(date +%#A)
+curl "http://maint:psvIdHspur0w@64.76.153.66/maint/modules/cdrreport/cdrreport/index.php?date_start=$AYER&date_end=$AYER&field_name=dstchannel&field_pattern=ZAP&menu=cdrreport&exportcsv=yes&rawmode=yes" --output /report.csv
+awk 'BEGIN{FS=OFS=","}{$4=$5=$6=$8="";gsub(FS"+",FS)}{print}' /report.csv > /cdrreport.csv
+rm -r /report.csv
+smbmount //10.0.0.201/respaldos/Reportes_Central /media/Reportes_Central -o user="NAS1T\admin",pass="aquiles"
+if [ $CAMBIODIA == SABADO)
+mv /*.csv /media/Reportes_Central
+smbumount /media/Reportes_Central
+exit 0

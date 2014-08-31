@@ -1,0 +1,8 @@
+#!bin/bash
+CAMBIODIA=$(date +%#A)
+if [ "$CAMBIODIA" == "FRIDAY" ]; then
+	echo "es $CAMBIODIA"
+else
+	echo "no es ni sabado ni domingo"
+fi
+exit 0

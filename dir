@@ -1,0 +1,12 @@
+#!bin/bash
+dir="/media/SAP"
+year=$(date +%Y)
+echo "Muestra el Año:$year"
+if [ -d $dir/$year ]; then
+	echo "El Directorio $year Existe!"
+else
+	echo "El Directorio $year no Existe!"
+	mkdir /media/SAP/$year
+fi
+
+exit 0

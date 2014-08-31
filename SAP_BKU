@@ -1,0 +1,51 @@
+#!/bin/bash
+SAP="/media/SAP"
+BKU_SAP="/media/BKU_SAP"
+YEAR=$(date +%Y)
+MONTH=$(date +%B\ %Y)
+DAY=$(date +date +%d-%#B-%Y)
+echo "Montando el directorio de respaldos de SAP en $SAP"
+smbmount //10.0.0.206/c$/BUT $SAP -o user="LATINTELE0\administrador",pass="Pa$$w0rd"
+echo "Borramos todos los Attachments*.zip en el directorio $SAP"
+rm $SAP/Attachments*.zip
+echo "Borramos todos los BitMaps*.zip en el directorio $SAP"
+rm $SAP/BitMaps*.zip
+echo "Borramos todos los ExcelDocs*.zip en el directorio $SAP"
+rm $SAP/ExcelDocs*.zip
+echo "Borramos todos los WordDocs*.zip en el directorio $SAP"
+rm $SAP/WordDocs*.zip
+echo "Borramos todos los .BU del directorio $SAP/FastRecover"
+rm $SAP/FastRecover/*.BU
+echo "Movemos todos los .BU de $SAP a $SAP/FastRecover"
+mv $SAP/*.BU $SAP/FastRecover/
+echo "Montamos el directorio del Disco Externo en $BKU_SAP"
+smbmount //10.0.0.201/respaldos/Respaldo_SAP $BKU_SAP -o user="NAS1T\admin",pass="aquiles"
+echo "comprobamos que los directorios existen"
+if [ -d $BKU_SAP/$YEAR ]; then
+        echo "El Directorio $YEAR Existe!"
+	if [ -d $BKU_SAP/$YEAR/$MONTH ]; then
+		echo "El Directorio $MONTH Existe!"
+	else
+		echo "El Directorio $MONTH no Existe!"
+		mkdir $BKU_SAP/$YEAR/$MONTH
+	fi
+	if [ -d $BKU_SAP/$YEAR/$MONTH/$DAY ]; then
+		echo "El Directorio $DAY Existe!"
+	else
+		echo "El Directorio $DAY no Existe!"
+		mkdir $BKU_SAP/$YEAR/$MONTH/$DAY
+	fi
+else
+        echo "El Directorio $YEAR,$MONTH y $DAY no Existen!"
+	echo "Creamos los directorios"
+        mkdir $BKU_SAP/$YEAR
+	mkdir $BKU_SAP/$YEAR/$MONTH
+	mkdir $BKU_SAP/$YEAR/$MONTH/$DAY
+fi
+echo "Movemos los respaldo desde $SAP a $BKU_SAP/$YEAR/$MONTH/$DAY"
+mv $SAP/*.zip $BKU_SAP/$YEAR/$MONTH/$DAY
+echo "Desmontamos $SAP"
+smbumount $SAP
+echo "Desmontamos $BKU_SAP"
+smbumount $BKU_SAP
+exit 0
