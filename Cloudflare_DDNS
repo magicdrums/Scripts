@@ -1,0 +1,132 @@
+#!/bin/sh
+# 
+# CloudFlare Dynamic DNS
+# 
+# Updates CloudFlare records with the current public IP address
+# 
+# Takes the same basic arguments as A/CNAME updates in the CloudFlare API
+# https://www.cloudflare.com/docs/client-api.html#s5.2
+# 
+# Use with cron jobs etc.
+# 
+# e.g.
+# 
+# manually run:
+# cloudflare_dyn_dns.sh -tkn 404613183ab3971a2118ae5bf03d63e032f9e -email test@example.com -z example.com -name extra
+#
+# cronjob entry to run every 5 minutes:
+# */5 * * * * /path/to/cloudflare_dyn_dns.sh -tkn 404613183ab3971a2118ae5bf03d63e032f9e -email test@example.com -z example.com -name extra >> /path/to/cloudflare_dyn_dns.log
+# 
+# will both set the type A DNS record for extra.example.com to the current public IP address for user test@example.com with the provided API tkn
+
+tkn=
+email=
+z=
+type=A
+id=
+name=
+content=
+ttl=1
+service_mode=0
+
+while [ "$1" != "" ]; do
+    case $1 in
+        -tkn )     shift
+                   tkn=$1
+                   ;;
+        -email )   shift
+                   email=$1
+                   ;;
+        -z )       shift
+                   z=$1
+                   ;;
+        -type )    shift
+                   type=$1
+                   ;;
+        -id )      shift
+                   id=$1
+                   ;;
+        -name )    shift
+                   name=$1
+                   ;;
+        -content ) shift
+                   content=$1
+                   ;;
+        -ttl )     shift
+                   ttl=$1
+                   ;;
+        -service_mode ) shift
+                        service_mode=$1
+                        ;;
+        * )        echo "unknown parameter $1"
+                   exit 1
+    esac
+    shift
+done
+
+if [ "$content" = "" ] 
+then
+    echo "Attempting to get current public IP Address for content."
+    content=`curl -s http://myexternalip.com/raw`
+    if [ "$content" = "" ]
+    then
+        echo "No IP address to set record value with." 
+        exit 1
+    fi
+fi
+
+if [ "$name" = "" ]
+then
+    echo "You must provide the name of the record you wish to change." 
+    exit 1
+fi
+
+if [ "$z" = "" ]
+then
+    echo "You must provide the domain you wish to change."
+    exit 1
+fi
+
+existing_content=`host -t $type $name.$z | sed -E 's/.+?\s+([^\s]+)$/\1/'`
+
+if [ "$content" = "$existing_content" ]
+then
+    echo "Existing record value $existing_content is the same as provided content $content. Exiting."
+    exit
+fi
+
+if [ "$tkn" = "" ]
+then
+    echo "You must provide your user API token."
+    exit 1
+fi
+
+if [ "$email" = "" ]
+then
+    echo "You must provide your user email."
+    exit 1
+fi
+
+# Get the record id for the entry we're trying to change if it's not provided
+if [ "$id" = "" ]
+then
+    response_json=`curl -s https://www.cloudflare.com/api_json.html -d 'a=rec_load_all' -d "tkn=$tkn" -d "email=$email" -d "z=$z"`
+    id=`echo $response_json | sed -E "s/.+\{\"rec_id\":\"([0-9]+)\"[^\}]+$name.$z.+/\1/g"`
+    if [ "$id" = "" ]
+    then
+        echo "DNS Record ID could not be found, please make sure it exists"
+        exit 1
+    fi
+fi
+
+# Update the DNS record
+update_response=`curl -s https://www.cloudflare.com/api_json.html -d 'a=rec_edit' -d "tkn=$tkn" -d "id=$id" -d "email=$email" -d "z=$z" -d "type=$type" -d "name=$name" -d "content=$content" -d "service_mode=$service_mode" -d "ttl=$ttl"`
+
+success_val=`echo $update_response | sed -E "s/.+\"result\":\"([^\"]+)\".+/\1/g"`
+if [ "$success_val" = "success" ]
+then
+    echo "Record Updated."
+else
+    echo "Record update failed."
+    exit 1
+fi
