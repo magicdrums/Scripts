@@ -3,7 +3,8 @@ Scripts
 
 Bash Scripts
 
-* Base64.php: Pequeño script para desencriptar string's con llave en base64
+* Base64.php: Pequeño script para desencriptar string's con llave en base64.
+* CloudFlare_DDNS: Aplicacion Bash Shell que permite actualizar dinamicamente la IP publica de un servidor, de esta forma podemos hacer que un registro DNS en CloudFlare se actualice si nuestro servidor sale por una IP dinamicamente.
 * Custom_Meetme: Aplicacion para asterisk para agregar en el archivo extensions.conf, permite egregar opciones de conferencia solicitando el numero y la contraseña.
 * Hello.sh: Nada...
 * Send_Files_Sendmail: Envio de mails por medio de SendMail con archivos adjuntos.
