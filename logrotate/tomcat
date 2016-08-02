@@ -1,0 +1,9 @@
+/home/openemm/logs/catalina.out {
+    copytruncate
+    daily
+    dateext
+    rotate 3
+    compress
+    missingok
+    size 100M
+    }
