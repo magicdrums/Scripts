@@ -1,0 +1,9 @@
+/home/openemm/var/log/*log {
+    copytruncate
+    daily
+    dateext
+    rotate 3
+    compress
+    missingok
+    size 100M
+    }

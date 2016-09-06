@@ -1,0 +1,82 @@
+#!/usr/bin/perl
+
+#Author: Alex Kuklin <alex@kuklin.ru>
+#Version: 0.1
+#Description: Nagios plugin for Asterisk registry state check
+
+use strict;
+use warnings;
+use Asterisk::AMI;
+use Nagios::Plugin;
+
+use Data::Dumper;
+
+my $np = Nagios::Plugin->new( shortname => "check_ast_reg", usage => "" );
+
+$np->add_arg(
+     spec => 'host|H=s',
+     help => '-H, --host=asteriskhost',
+     required => 1
+   );
+$np->add_arg(
+     spec => 'users|u=s@',
+     help => '-u, --users=sip:user@domain:host',
+     required => 1
+   );
+
+$np->add_arg(
+     spec => 'amilogin|a=s',
+     help => '-a, --amilogin=AMIlogin',
+     required => 1
+   );
+
+$np->add_arg(
+     spec => 'amipwd|p=s',
+     help => '-p, --amipwd=AMIpassword',
+     required => 1
+   );
+
+$np->getopts;
+
+my $regs = {};
+
+#Connect to asterisk
+my $astman = Asterisk::AMI->new(PeerAddr => $np->opts->host,
+				Username => $np->opts->amilogin,
+				Secret	=> $np->opts->amipwd,
+				Timeout => 3, #Default timeout for all operations, 3 seconds
+				Keepalive => 60, #Send a keepalive every minute
+				on_error => sub {$np->nagios_exit( UNKNOWN, "Error in communication to asterisk" ); },
+				on_timeout => sub { $np->nagios_exit( UNKNOWN, "Timeout in communication to asterisk" );  }
+			);
+
+
+$np->nagios_exit( UNKNOWN, "Unable to connect to asterisk" ) unless ($astman);
+
+my $resp = $astman->action({ Action => 'SIPshowregistry' } );
+
+foreach my $rec (@{$resp->{EVENTS}})
+{
+   $regs->{'sip:'.$rec->{Username}.':'.$rec->{Host}} = $rec->{State};
+}
+
+$resp = $astman->action({ Action => 'IAXregistry' } );
+
+foreach my $rec (@{$resp->{EVENTS}})
+{
+   $regs->{'iax2:'.$rec->{Username}.':'.$rec->{Host}} = $rec->{State};
+}
+
+
+my @tocheck = @{$np->opts->users};
+my @unregistered;
+
+foreach my $u (@{$np->opts->users})
+{
+   push @unregistered, $u unless $regs->{$u} && $regs->{$u} eq 'Registered';
+
+}
+
+$np->nagios_exit( CRITICAL, "not registered: " . join(',',@unregistered)  ) if @unregistered;
+
+$np->nagios_exit( OK, "all registrations ok"  );

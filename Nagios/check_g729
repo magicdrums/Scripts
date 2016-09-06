@@ -1,0 +1,47 @@
+#!/usr/bin/perl
+use strict;
+
+my ($WARN, $CRIT, $used1, $used2, $total, $line, $used, $percent, $status, $out, $realwarn, $realcrit)=($ARGV[0], $ARGV[1], 0, 0, 0, undef, 0, 0, 3, undef, 0, 0);
+
+#get line from asterisk, example line below
+#0/0 encoders/decoders of 50 licensed channels are currently in use
+$line=`/usr/sbin/asterisk -rx "g729 show licenses" | grep licensed`;
+($used1, $used2, $total) = ($line =~ /(\d*)\/(\d*) encoders\/decoders of (\d*) licensed channels/);
+
+#gets how many licences are in use (it is the bigger of used1 or used2)
+if ( $used1 >= $used2 ) {
+	$used = $used1;
+}elsif ( $used1 < $used2 ) {
+	$used = $used2;
+}
+
+#get percent of total licences in use
+if ( $used == 0 ) {
+	$percent = 0;
+}else {
+	$percent = ("%.3g", (100 * ($used / $total)));
+}
+
+#gets how many licences need to be in use for warning and crit to be triped
+$realwarn = $total * $WARN / 100;
+$realcrit = $total * $CRIT / 100;
+
+#sets the status based on if crit or warn or whatever
+
+if ( ( $percent < $WARN ) || ( $percent == 0 ) ) {
+	$status=0;
+	$out="OK";
+}elsif ( $percent >= $CRIT ) {
+	$status=2;
+	$out="Critical";
+}elsif ( $percent >= $WARN ) {
+	$status=1;
+	$out="Warning";
+}else {
+	$status=3;
+	$out="Unknown";
+}
+
+#outputs the status and exits with status code
+print "$out - $percent% - $used G729 codecs used out of $total | used=$used;$realwarn;$realcrit;0;$total\n";
+exit $status;
