@@ -14,5 +14,10 @@ Scripts
 * nginxstats.py: Aplicacion para ver el estado de Nginx conexiones totales, conexiones por segundo, respuestas por segundo, lectura, escrtiuras y espera, la pregunta lo realiza cada 30 segundos.
 * vtiger_delete_modules.php: PHP para Borrar modulos en Vtiger.
 * mac.py: para la generacion de MAC Address en XenServer con un provisionador de infraestructura (ansible)
+** Se debe instalar netaddr de python
+```
+pip install netaddr
+
+```
 
 Cheers!
