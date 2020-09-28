@@ -1,0 +1,20 @@
+#!/bin/bash
+
+VHOST=$2
+COMMAND=$1
+QUEUE=$3
+
+CHECK_MQ=$(rabbitmqctl -p $VHOST $COMMAND|tail -n +4|grep $QUEUE|cut -f2-)
+
+if [[ -z "$1" ]] || [[ -z "$2" ]] || [[ -z "$3" ]]; then
+	echo "Faltan Parametros : $0 COMMAND VHOST QUEUE";
+        exit 3;
+else
+	if [[ $CHECK_MQ == 0 ]]; then
+		echo "OK, Queue $QUEUE Empty.";
+		exit 0;
+	else
+		echo "CRITICAL, In $QUEUE, Queued $CHECK_MQ Messages";
+		exit 2;
+	fi
+fi
