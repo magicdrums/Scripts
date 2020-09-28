@@ -1,0 +1,52 @@
+#!/bin/bash
+# Author : Victor Salvador Pereira Barahona
+# Email : vi.pereirab@alumnos.duoc.cl
+# ID : 16422152-0
+# Script : Respaldo de directorio
+# Parameters : BACKUPNAME, SOURCE, DESTINATION, CHECKBACKUP
+# BACKUPNAME : Nombre del respaldo
+# SOURCE : Origen del respaldo
+# DESTINATION : Destiono del respaldo
+# CKECKBACKUP : Comprobacion MD5 del respaldo para proximos Usos
+# FUNCTIONS : execute, backup
+# execute : Comprobacion de ejecucion del Script
+# backup : tarea de respaldo
+
+BACKUPNAME=$1.$(date +%d-%m-%y-%H%M%S)
+SOURCE=$1
+DESTINATION=$2
+
+function execute(){
+if [ $# -eq 0 ]; then
+	echo "Este Script se usa: $0 ORIGEN DESTINO"; 
+	exit 1;
+fi
+};
+
+function backup(){
+tar -czf $DESTINATION$BACKUPNAME.tar.gz $SOURCE
+};
+
+if [[ $(id -u) -ne 0 ]]; then
+	echo "No eres Root no tienes poder aqui" ;
+	exit 1 ;
+else
+	if [[ ! -d $1 ]]; then
+		echo -e "Ruta $1 no existe\nNo es posible continuar";
+		execute
+		exit 1;
+	else
+		if [[ ! -d $2 ]]; then
+			echo -e "Ruta $2 No Existe\nNo es posible continuar";
+			execute
+			exit 1;
+		else
+			echo -e "Ruta Existen...\nSe ejecuta Respaldo...\nCreando $DESTINATION/$BACKUPNAME.tar.gz";
+			backup
+			CHECKBACKUP=$(md5sum $DESTINATION$BACKUPNAME.tar.gz)
+			echo "Check MD5 $CHECKBACKUP";
+			echo "Respaldo generado Con exito";
+			exit 0;
+		fi
+	fi
+fi

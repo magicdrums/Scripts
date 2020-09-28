@@ -1,0 +1,18 @@
+#! /bin/bash
+
+docker_container=gcotrs_otrs_1
+countmail=$(docker exec -it $docker_container su -c "/opt/otrs/bin/otrs.Console.pl Maint::Email::MailQueue --list" -s /bin/bash otrs|grep -E "Mail queue" | awk '{print $4}')
+
+if [[ ($countmail == "empty.") || ($countmail -le 3 ) ]]; then
+	echo "OK - $countmail Mails in queue OTRS"
+	exit 0
+elif [ $countmail -ge 4 -a $countmail -le 15 ]; then
+	echo "WARNING - $countmail Mails in queue OTRS"
+	exit 1
+elif [ $countmail -ge 16 ]; then
+	echo "CRITICAL - $countmail Mails in queue OTRS"
+	exit 2
+else
+	echo "UNKNOWN - $countmail"
+	exit 3
+fi

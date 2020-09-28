@@ -1,0 +1,34 @@
+#!/bin/bash
+# Author : Victor Salvador Pereira Barahona
+# Email : vi.pereirab@alumnos.duoc.cl
+# ID : 16422152-0
+# Script : Creacion de Usuarios
+# Parameters : USER, COMMENT, PASS, HOMEDIR
+# USER : Nombre de usuario LOGIN UNIX
+# COMMENT : Comentario para el Usuario
+# PASS : Contraseña se define segun la Fecha
+# HOMEDIR : Definido por el sistema ruta por defecto de los HomeDir UNIX (/home)
+# 
+
+PASS=changeme.$(date +%d-%m-%y)
+
+if [[ $(id -u) -ne 0 ]]; then
+	echo "No eres Root no tienes poder aqui" ;
+	exit 1 ;
+else
+	read -p "Ingrese el Nombre de Usuario a Crear (Ej. nombre.apellido): " USER ;
+	if getent passwd $USER; then
+		echo "Usuario Existe, NO es posible Continuar, intente con Otro Usuario";
+		exit 1;
+	else
+		read -p "Ingrese un Comentario para el usuario (Ej. Nombre Apellido): " COMMENT ;
+
+		adduser -p $(echo $PASS | openssl passwd -1 -stdin) -c "$COMMENT" $USER ;
+		passwd --expire $USER ; 
+		
+		HOMEDIR=$(getent passwd $USER | cut -d: -f6)
+		
+		echo -e "Los Datos del Nuevo Usuario son:\nUsuario : $USER\nContraseña : $PASS\nHomeDirectory : $HOMEDIR" ;
+		exit 0 ;
+	fi
+fi
