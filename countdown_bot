@@ -1,0 +1,5 @@
+#!/bin/bash
+
+DATE_DIFF=$(datediff 'now' $1 -f "%d Días %H Horas %M Minutos con %S Segundos")
+
+echo "Faltan $DATE_DIFF para $2"
