@@ -16,7 +16,7 @@ case $opt in
 2) echo Contraseña Numerica :
  tr -dc 0-9 < /dev/urandom | head -c $long | xargs;;
 3) echo Contraseña Alfanumerica con caracteres extraños :
- tr -dc A-Za-z'[:graph:]' < /dev/urandom | head -c $long | xargs;;
+ tr -dc A-Za-z'[:graph:]' < /dev/urandom | head -c $long | xargs -o;;
 4) echo "Bye $USER";
  exit 1;;
 *) echo "$opt No es una Opcion Valida, Favor seleccionar solo las opciones 1 al 4";
